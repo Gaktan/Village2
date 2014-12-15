@@ -8,8 +8,8 @@ import org.newdawn.slick.Color;
 public class Climat {
 	
 	public Color color;
-	float ressources;
-	float difficulty;
+	public float ressources;
+	public float difficulty;
 	public String name;
 	
 	private static List<Climat> climats = new ArrayList<Climat>();
@@ -62,5 +62,9 @@ public class Climat {
 	
 	public float getRessources(){
 		return ressources;
+	}
+	
+	public float getDifficulty() {
+		return difficulty;
 	}
 }

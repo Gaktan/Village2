@@ -107,7 +107,7 @@ public class RightClickMenu extends Entity{
 					
 					int in = (int) (Math.random()*4);
 
-					// in = 3;
+					in = 2;
 					
 					switch (in) {
 					case 0:

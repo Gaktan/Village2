@@ -16,9 +16,9 @@ public class Village extends Entity{
 	private List<Villager> villagerList;
 	private int population;
 	private String name;
-	private Chart popChart;
+	ChartCurve popChart;
 	private final float SIZE_LIM = 350;
-	private final int MAX_POP = 3000;
+	private double MAX_POP ;
 	private float maxSize;
 	private boolean growing;
 	private float maxVelocity;
@@ -26,6 +26,9 @@ public class Village extends Entity{
 	public Class<? extends Algo> typeAlgo;
 	public Climat climat;
 	public float maxRessource;
+	private float maxDifficulty;
+	private boolean upToDate;
+	
 	public int age;
 	public int maxPop;
 
@@ -50,14 +53,17 @@ public class Village extends Entity{
 		growing = true;
 		setLength(maxSize); setHeight(maxSize);
 
-		popChart = new Chart(new Vector2f(400, 200), false);
+		popChart = new ChartCurve(this.getColor(), Main.graph);
 
 		typeAlgo = c;
 
 		int nb = new java.util.Random().nextInt(Climat.getNbClimats());
 
 		climat = new Climat(Climat.getClimat(nb));
+		MAX_POP = (4000*climat.getRessources());
 		maxRessource = climat.getRessources();
+		maxDifficulty = climat.getDifficulty();
+		System.out.println(MAX_POP);
 
 		age = 0;
 		maxPop = 0;
@@ -89,8 +95,7 @@ public class Village extends Entity{
 			if(cam.collide(v)){
 				v.render();
 			}
-		}	
-		popChart.render(cam, getColor());
+		}
 
 		if(owner.isDisplayNames()){
 			float x = getX() + getLength() + 20;
@@ -99,6 +104,7 @@ public class Village extends Entity{
 			Rendering.printScreen(x,  y+=20,  ""+population, 0);
 			Rendering.printScreen(x,  y+=20,  typeAlgo.getName(), 0);
 			Rendering.printScreen(x,  y+=20,  climat.name, 0);
+			//Rendering.printScreen(x, y+=20, ""+lvlTech, 0);
 
 			int a = age;
 			if(typeAlgo.equals(AlgoBaseX100.class)){
@@ -120,7 +126,7 @@ public class Village extends Entity{
 
 	public void updateBaby(){
 		setHeight(maxSize); setLength(maxSize);
-		
+
 		int oldPop = population;
 
 		Iterator<Villager> it = villagerList.iterator();
@@ -146,17 +152,19 @@ public class Village extends Entity{
 				nbNaissances++;
 			}
 		}
-		
+
 		float tempTauxNat = tauxNat;
 		if(oldPop != 0)
 			tempTauxNat = (float)(nbNaissances) / (float)(oldPop);
-		
+
 		if(nbNaissances > 0)
 			tauxNat = (tempTauxNat + tauxNat) / 2;
-		System.out.println("taux nat : " + tauxNat);
-		
-		popChart.addValue(population);
+		//System.out.println("taux nat : " + tauxNat);
+
+		popChart.addPoint(population);
 		age++;
+		
+	
 	}
 
 	public void populate(int amount){
@@ -192,31 +200,32 @@ public class Village extends Entity{
 
 	public void updateHealth(){
 		int oldPop = population;
-		
+
 		int nbMorts = 0;
 
 		List<Villager> temp = new ArrayList<Villager>();
-		
+
 		for(Villager v : villagerList){
 			boolean c = v.updateHealth();
-			
+
 			if(c) temp.add(v);
 		}
-		
+
 		for(Villager v2 : temp){
 			remVillager(v2);
 
 			nbMorts++;
 		}
-		
+
 		float tempTauxMort = tauxMort;
 		if(oldPop != 0)
 			tempTauxMort = (float)(nbMorts) / (float)(oldPop);
 		if(tempTauxMort != 0)
 			tauxMort = tempTauxMort;
-		
-		System.out.println("Taux mort : " + tauxMort + "\n");
+
+		//System.out.println("Taux mort : " + tauxMort + "\n");
 	}
+	
 
 	public Vector2f randomCoordInVillage(){		
 		float x = Random.randFloat(getX(), getX() + getLength());
@@ -245,6 +254,21 @@ public class Village extends Entity{
 		float y = destination.y - position.y;
 
 		return new Vector2f(x, y);
+	}
+	public void upTech() {//On augmente la population maximale théorique 
+						 //les ressources et le cap de ressources récupérables
+						//après une chute liée au point de crise 
+	    setMAX_POP(getMAX_POP() + 0.03*getMAX_POP());
+		if(getMaxRessource()<0.95 && climat.ressources<0.95){
+			setMaxRessource((float) (getMaxRessource() + getMaxRessource()*0.05));
+			climat.ressources += (float) climat.ressources*0.05;
+		}
+				//On réduit la difficulté du climat et le cap de diificulté
+				//atteignable après une augmentation liée au point de crise 
+		if(getMaxDifficulty()>=0.05 && climat.difficulty>0.05){
+			setMaxDifficulty((float) (getMaxDifficulty() - getMaxDifficulty()*0.05));
+			climat.difficulty -= (float) climat.difficulty*0.05;
+		}
 	}
 
 	public void printDeath(){
@@ -281,7 +305,7 @@ public class Village extends Entity{
 		return SIZE_LIM;
 	}
 
-	public int getMAX_POP() {
+	public double getMAX_POP() {
 		return MAX_POP;
 	}
 
@@ -312,5 +336,32 @@ public class Village extends Entity{
 	public List<Villager> getVillagerList() {
 		return villagerList;
 	}
+	public void setMAX_POP(double mAX_POP) {
+		MAX_POP = mAX_POP;
+	}
+
+	public float getMaxRessource() {
+		return maxRessource;
+	}
+
+	public void setMaxRessource(float maxRessource) {
+		this.maxRessource = maxRessource;
+	}
+
+	public float getMaxDifficulty() {
+		return maxDifficulty;
+	}
+
+	public void setMaxDifficulty(float maxDifficulty) {
+		this.maxDifficulty = maxDifficulty;
+	}
+	public boolean isUpToDate() {
+		return upToDate;
+	}
+
+	public void setUpToDate(boolean upToDate) {
+		this.upToDate = upToDate;
+	}
+	
 
 }

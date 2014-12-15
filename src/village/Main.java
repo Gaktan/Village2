@@ -13,7 +13,6 @@ import algos.AlgoBase;
 
 import village.RightClickMenu.Option;
 
-
 public class Main {
 	public static boolean GameRunning = true;
 
@@ -25,24 +24,21 @@ public class Main {
 	public static Vector2f mousePos;
 
 	public static VillageList villageList;
-	public static List<Catastrophe > catastrophes; 
+	public static List<Catastrophe > catastrophes;
+	public static Chart2 graph;
 
-	public static void gameLoop() throws InterruptedException
-	{
+	public static void gameLoop() throws InterruptedException {
 		double lastFpsTime = 0;
 		int fps = 0;
 		long lastLoopTime = System.nanoTime();
 		final int TARGET_FPS = 900;
 		final long OPTIMAL_TIME = 1000000000 / TARGET_FPS;	//1000000000
-
-		Village vallon = new Village(20, 20, "Moktar", Color.red, AlgoBase.class);
-
-		vallon.populate(50);
+		
+		graph = new Chart2(new Vector2f(400, 100));
 		
 		catastrophes = new ArrayList<Catastrophe>();
 
 		villageList = new VillageList();
-		villageList.addVillage(vallon);
 
 		menu = new RightClickMenu(new Vector2f(0, 0), 0, 150, 10);
 		menu.addOption(new Option("Create Village"));
@@ -79,10 +75,12 @@ public class Main {
 
 				if(!speed){
 					villageList.updateStat();
+					graph.update();
 				}
 			}
 			if(speed){
 				villageList.updateStat();
+				graph.update();
 			}
 			else
 				Display.sync(60);
@@ -120,6 +118,8 @@ public class Main {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 
 		villageList.render(camera);
+		
+		graph.render(camera);
 
 		if(rMenu){
 			menu.render(mousePos);

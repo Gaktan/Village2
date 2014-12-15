@@ -4,18 +4,14 @@ public class Random {
 
 	public static String randName(){
 		StringBuffer sb = new StringBuffer();
-		boolean pre = false;
 		if(randBool()){		//prefix
 			sb.append(randPrefix());
-			pre = true;
 		}
 		sb.append(randMiddle());
-		if(!pre){
-			sb.setCharAt(0, Character.toUpperCase(sb.charAt(0)));
-		}
 		if(randBool()){
 			sb.append(randSuffix());
 		}
+		sb.setCharAt(0, Character.toUpperCase(sb.charAt(0)));
 		return sb.toString();
 	}
 	

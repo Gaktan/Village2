@@ -24,6 +24,7 @@ public class Entity implements Renderable{
 		this.velocity = new Vector2f(0, 0);
 		color = new Color(Color.white);
 	}
+	
 	public Entity(float x, float y, float height, float length, boolean render, boolean moving) {
 		this(new Vector2f(x, y), height, length, render, moving);
 	}
